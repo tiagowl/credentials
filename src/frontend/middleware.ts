@@ -6,7 +6,7 @@ const PUBLIC_PREFIXES = ['/api/vault/status', '/api/vault/setup', '/api/auth/log
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get('vault_session');
+  const hasValidSession = !!request.cookies.get('vault_session')?.value;
 
   const isPublic =
     PUBLIC_PATHS.includes(pathname) ||
@@ -22,11 +22,11 @@ export function middleware(request: NextRequest) {
 
   if (pathname === '/') {
     return NextResponse.redirect(
-      new URL(sessionCookie?.value ? '/dashboard' : '/login', request.url)
+      new URL(hasValidSession ? '/dashboard' : '/login', request.url)
     );
   }
 
-  if (!sessionCookie?.value && !isPublic) {
+  if (!hasValidSession && !isPublic) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Sessão inválida' } },

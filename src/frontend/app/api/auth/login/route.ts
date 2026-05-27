@@ -1,6 +1,8 @@
+import { NextResponse } from 'next/server';
 import { login } from '@/services/auth.service';
 import { loginSchema } from '@/lib/validators/schemas';
-import { apiSuccess, handleApiError, AppError } from '@/lib/api-error';
+import { handleApiError, AppError } from '@/lib/api-error';
+import { applySessionCookie } from '@/lib/session';
 import {
   checkRateLimit,
   recordFailedLogin,
@@ -24,7 +26,9 @@ export async function POST(request: Request) {
     const parsed = loginSchema.parse(body);
     const result = await login(parsed.password);
     clearLoginAttempts(ip);
-    return apiSuccess(result);
+    const response = NextResponse.json({ success: result.success });
+    applySessionCookie(response, result.payload);
+    return response;
   } catch (error) {
     if (error instanceof AppError && error.code === 'UNAUTHORIZED') {
       recordFailedLogin(getClientIp(request));

@@ -6,12 +6,10 @@ import {
   getEncryptionSalt,
 } from '@/lib/crypto';
 import {
-  createSession,
-  setSessionCookie,
+  createSessionPayload,
   clearSessionCookie,
-  destroySession,
   getSessionFromCookies,
-  refreshSession,
+  extendSessionCookie,
 } from '@/lib/session';
 import { AppError } from '@/lib/api-error';
 import crypto from 'crypto';
@@ -39,10 +37,9 @@ export async function setupVault(password: string) {
   });
 
   const vaultKey = deriveVaultKey(password, encryptionSalt);
-  const session = createSession(vaultKey, 15);
-  await setSessionCookie(session.sessionId);
+  const payload = createSessionPayload(vaultKey, 15);
 
-  return { success: true };
+  return { success: true, payload };
 }
 
 export async function login(password: string) {
@@ -57,17 +54,12 @@ export async function login(password: string) {
   }
 
   const vaultKey = deriveVaultKey(password, config.encryptionSalt);
-  const session = createSession(vaultKey, config.sessionTimeout);
-  await setSessionCookie(session.sessionId);
+  const payload = createSessionPayload(vaultKey, config.sessionTimeout);
 
-  return { success: true };
+  return { success: true, payload };
 }
 
 export async function logout() {
-  const session = await getSessionFromCookies();
-  if (session) {
-    destroySession(session.sessionId);
-  }
   await clearSessionCookie();
   return { success: true };
 }
@@ -111,7 +103,7 @@ export async function refreshSessionActivity() {
   if (!session) return false;
   const config = await prisma.vaultConfig.findFirst();
   const timeout = config?.sessionTimeout ?? 15;
-  return refreshSession(session.sessionId, timeout);
+  return extendSessionCookie(timeout);
 }
 
 export { getEncryptionSalt };
