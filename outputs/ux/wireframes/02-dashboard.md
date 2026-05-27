@@ -1,0 +1,139 @@
+# Wireframes — Dashboard
+
+**Telas:** Dashboard empty · Dashboard populated  
+**Stories:** US-012, US-013, US-026
+
+---
+
+## WF-04: Dashboard — Estado Vazio
+
+**Rota:** `/dashboard`  
+**Condição:** Zero credenciais
+
+### Desktop
+
+```
+┌──────────┬──────────────────────────────────────────────────────────┐
+│ 🔐 Vault │ [🔍 Buscar credenciais...____________] [🔒][🌙][+ Nova]  │
+│          ├──────────────────────────────────────────────────────────┤
+│ ► Dash   │                                                          │
+│   Creds  │                    ┌─────────────────┐                   │
+│   Health │                    │    🔑 (illust)  │                   │
+│   Config │                    └─────────────────┘                   │
+│          │              Seu vault está vazio                         │
+│          │     Adicione sua primeira credencial para começar        │
+│          │                                                          │
+│          │              [ + Adicionar credencial ]                    │
+│          │                                                          │
+│          │     💡 Dica: Comece pelo app que mais usa (ex: YouTube)  │
+└──────────┴──────────────────────────────────────────────────────────┘
+```
+
+### Mobile
+
+```
+┌─────────────────────────┐
+│ [🔍 Buscar...] [+][🌙]  │
+├─────────────────────────┤
+│                         │
+│      🔑 (illust)        │
+│   Vault vazio           │
+│                         │
+│ [+ Adicionar]           │
+│                         │
+├─────────────────────────┤
+│ [🏠] [🔑] [➕] [⚙️]     │
+└─────────────────────────┘
+```
+
+---
+
+## WF-05: Dashboard — Populated
+
+### Desktop
+
+```
+┌──────────┬──────────────────────────────────────────────────────────┐
+│ 🔐 Vault │ [🔍 Buscar...________________] [🔒][🌙][+ Nova]          │
+│          ├──────────────────────────────────────────────────────────┤
+│ ► Dash   │  Olá! 👋                         Vault Health            │
+│   Creds  │  24 credenciais · 3 esta semana   ┌──────────────┐       │
+│   Health │                                   │ 🛡 78/100    │       │
+│   Config │  ── Favoritos ──────────────────  │ 3 fracas →   │       │
+│          │  ┌────────┐ ┌────────┐ ┌────────┐ └──────────────┘       │
+│          │  │[YT] YT │ │[FB] FB │ │[X] X  │                        │
+│          │  │ 📋 sen │ │ 📋 sen │ │ 📋 sen │                        │
+│          │  └────────┘ └────────┘ └────────┘                        │
+│          │                                                          │
+│          │  ── Recentes ─────────────────────────────────────────   │
+│          │  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐            │
+│          │  │ Netflix│ │ Gmail  │ │ GitHub │ │ Nubank │            │
+│          │  │ há 2h  │ │ há 1d  │ │ há 3d  │ │ há 5d  │            │
+│          │  └────────┘ └────────┘ └────────┘ └────────┘            │
+│          │                                                          │
+│          │  [ Ver todas as credenciais → ]                           │
+└──────────┴──────────────────────────────────────────────────────────┘
+```
+
+### Mobile
+
+```
+┌─────────────────────────┐
+│ [🔍 Buscar...]    [+]   │
+├─────────────────────────┤
+│ 🛡 Vault Health  78/100 │
+│ 3 senhas fracas →       │
+├─────────────────────────┤
+│ ★ Favoritos             │
+│ ┌─────────────────────┐ │
+│ │[YT] YouTube    [📋] │ │
+│ └─────────────────────┘ │
+│ ┌─────────────────────┐ │
+│ │[FB] Facebook   [📋] │ │
+│ └─────────────────────┘ │
+├─────────────────────────┤
+│ Recentes                │
+│ ┌─────────────────────┐ │
+│ │[N] Netflix     [📋] │ │
+│ └─────────────────────┘ │
+├─────────────────────────┤
+│ [🏠] [🔑] [➕] [⚙️]     │
+└─────────────────────────┘
+```
+
+**Especificações:**
+- Favoritos: max 6 no dashboard, scroll horizontal em mobile
+- Recentes: últimas 5 por `updatedAt`
+- Health widget clicável → `/health`
+- Cards compactos no dashboard (só app + copy senha)
+
+---
+
+## WF-06: Vault Health (página dedicada)
+
+**Rota:** `/health`  
+**Stories:** US-026, US-027, US-028
+
+```
+┌──────────┬──────────────────────────────────────────────────────────┐
+│ Sidebar  │  Vault Health                                            │
+│          │                                                          │
+│          │  ┌────────────────────────────────────────┐              │
+│          │  │         🛡 Score Geral: 78/100          │              │
+│          │  │    ████████████████░░░░░░              │              │
+│          │  └────────────────────────────────────────┘              │
+│          │                                                          │
+│          │  ┌──────────┐ ┌──────────┐ ┌──────────┐                 │
+│          │  │ 18/24    │ │ 3        │ │ 1        │                 │
+│          │  │ Fortes   │ │ Fracas   │ │ Reutiliz.│                 │
+│          │  └──────────┘ └──────────┘ └──────────┘                 │
+│          │                                                          │
+│          │  ── Senhas fracas ─────────────────────────────────────   │
+│          │  │ [YT] YouTube    score: 25    [ Melhorar ]           │  │
+│          │  │ [FB] Facebook   score: 40    [ Melhorar ]           │  │
+│          │  │ [X]  Twitter    score: 30    [ Melhorar ]           │  │
+│          │                                                          │
+└──────────┴──────────────────────────────────────────────────────────┘
+```
+
+**"Melhorar"** → abre form edição com gerador de senha pre-preenchido

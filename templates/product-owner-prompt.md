@@ -45,7 +45,11 @@ Como Product Owner, preciso que você:
 ### Para Análise de Requisitos
 ```
 Analise os seguintes requisitos e crie user stories detalhadas:
-[Inserir requisitos aqui]
+- as funcionalidades estão no output de features-suggestions do feature-suggester, fazer todos menos as funcionalidades futuras;
+- o sistema sera feito com o framework next do react;
+- para intergair com o banco de dados usar a api routes do next com prisma orm;
+- para estilização usar chakra ui v3;
+- adaptar o layout para versão desktop, mobile e tablet;
 
 Foque em:
 - Identificar personas

@@ -67,16 +67,16 @@ Antes de sugerir features, preciso entender melhor seu projeto.
 Por favor, me forneça as seguintes informações:
 
 **Obrigatórias:**
-1. Qual o tipo de sistema? (ex: e-commerce, SaaS B2B, app mobile, rede social)
-2. Quem é o público-alvo principal?
-3. Quais são os principais objetivos de negócio?
+1. Qual o tipo de sistema? (ex: e-commerce, SaaS B2B, app mobile, rede social) sistema web;
+2. Quem é o público-alvo principal? somente eu;
+3. Quais são os principais objetivos de negócio? sistema intuitivo, moderno, bonito e profissional para lembrar credenciais de login de varios aplicativos (youtube, facebook, twitter, etc);
 
 **Opcionais (mas muito úteis):**
-4. Existem concorrentes que você admira ou quer superar?
-5. Quais funcionalidades já existem ou estão planejadas?
-6. Há restrições de orçamento ou prazo?
-7. Quais diferenciais você gostaria de ter?
-8. Como você medirá o sucesso do produto?
+4. Existem concorrentes que você admira ou quer superar? nao
+5. Quais funcionalidades já existem ou estão planejadas? crud de credenciais, com nome do aplicativo, nome de usuario, email, senha; filtros por nome de usuario, email e nome de aplicativo; opção de gerar senha ao salvar as credenciais;
+6. Há restrições de orçamento ou prazo? nao
+7. Quais diferenciais você gostaria de ter? nenhum;
+8. Como você medirá o sucesso do produto? sistema intuitivo, bonito e profissional para lembrar credenciais;
 ```
 
 ### Para Análise de Sistema Existente

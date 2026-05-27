@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Category {
+  SOCIAL
+  STREAMING
+  EMAIL
+  BANKING
+  WORK
+  OTHER
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+model VaultConfig {
+  id                 String   @id @default(uuid())
+  masterPasswordHash String
+  encryptionSalt     String
+  sessionTimeout     Int      @default(15)
+  theme              Theme    @default(SYSTEM)
+  accentColor        String   @default("blue")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Credential {
+  id               String            @id @default(uuid())
+  appName          String
+  username         String?
+  email            String?
+  passwordEnc      String
+  passwordIv       String
+  url              String?
+  category         Category          @default(OTHER)
+  iconUrl          String?
+  isFavorite       Boolean           @default(false)
+  customFieldsEnc  String?
+  customFieldsIv   String?
+  passwordStrength Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  passwordHistory  PasswordHistory[]
+
+  @@index([appName])
+  @@index([username])
+  @@index([email])
+  @@index([category])
+  @@index([isFavorite])
+  @@index([updatedAt])
+}
+
+model PasswordHistory {
+  id           String     @id @default(uuid())
+  credentialId String
+  credential   Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  strength     Int
+  changedAt    DateTime   @default(now())
+
+  @@index([credentialId])
+}
