@@ -10,7 +10,7 @@ import { Category } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
-    const { vaultKey } = await requireSession();
+    const { vaultKey, userId } = await requireSession();
     await refreshSessionActivity();
 
     const { searchParams } = new URL(request.url);
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         : undefined,
     };
 
-    const credentials = await listCredentialsPaginated(filters, vaultKey);
+    const credentials = await listCredentialsPaginated(userId, filters, vaultKey);
     return apiSuccess(credentials);
   } catch (error) {
     return handleApiError(error);
@@ -40,10 +40,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { vaultKey } = await requireSession();
+    const { vaultKey, userId } = await requireSession();
     const body = await request.json();
     const parsed = createCredentialSchema.parse(body);
-    const credential = await createCredential(parsed, vaultKey);
+    const credential = await createCredential(userId, parsed, vaultKey);
     return apiSuccess(credential, 201);
   } catch (error) {
     return handleApiError(error);

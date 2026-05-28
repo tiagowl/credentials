@@ -133,14 +133,16 @@ async function main() {
 
   await prisma.passwordHistory.deleteMany();
   await prisma.credential.deleteMany();
-  await prisma.vaultConfig.deleteMany();
+  await prisma.user.deleteMany();
 
   const masterPasswordHash = await bcrypt.hash(MASTER_PASSWORD, 12);
   const vaultKey = deriveVaultKey(MASTER_PASSWORD);
 
-  await prisma.vaultConfig.create({
+  await prisma.user.create({
     data: {
       id: VAULT_ID,
+      email: 'demo@vault.local',
+      displayName: 'Conta Demo',
       masterPasswordHash,
       encryptionSalt: SEED_SALT,
       sessionTimeout: 15,
@@ -156,10 +158,10 @@ async function main() {
     '',
     'DELETE FROM "PasswordHistory";',
     'DELETE FROM "Credential";',
-    'DELETE FROM "VaultConfig";',
+    'DELETE FROM "User";',
     '',
-    `INSERT INTO "VaultConfig" ("id", "masterPasswordHash", "encryptionSalt", "sessionTimeout", "theme", "accentColor", "createdAt", "updatedAt") VALUES (`,
-    `  '${VAULT_ID}',`,
+    `INSERT INTO "User" ("id", "email", "displayName", "masterPasswordHash", "encryptionSalt", "sessionTimeout", "theme", "accentColor", "createdAt", "updatedAt") VALUES (`,
+    `  '${VAULT_ID}', 'demo@vault.local', 'Conta Demo',`,
     `  '${sqlEscape(masterPasswordHash)}',`,
     `  '${SEED_SALT}',`,
     `  15, 'SYSTEM'::"Theme", 'blue', NOW(), NOW());`,
@@ -185,6 +187,7 @@ async function main() {
     await prisma.credential.create({
       data: {
         id: cred.id,
+        userId: VAULT_ID,
         appName: cred.appName,
         username: cred.username,
         email: cred.email,
@@ -204,8 +207,8 @@ async function main() {
     });
 
     sqlLines.push(
-      `INSERT INTO "Credential" ("id", "appName", "username", "email", "passwordEnc", "passwordIv", "url", "category", "iconUrl", "isFavorite", "customFieldsEnc", "customFieldsIv", "passwordStrength", "createdAt", "updatedAt") VALUES (`,
-      `  '${cred.id}', '${sqlEscape(cred.appName)}', '${sqlEscape(cred.username)}', '${sqlEscape(cred.email)}',`,
+      `INSERT INTO "Credential" ("id", "userId", "appName", "username", "email", "passwordEnc", "passwordIv", "url", "category", "iconUrl", "isFavorite", "customFieldsEnc", "customFieldsIv", "passwordStrength", "createdAt", "updatedAt") VALUES (`,
+      `  '${cred.id}', '${VAULT_ID}', '${sqlEscape(cred.appName)}', '${sqlEscape(cred.username)}', '${sqlEscape(cred.email)}',`,
       `  '${sqlEscape(enc)}', '${iv}', '${cred.url}', '${cred.category}'::"Category", '${iconUrl}',`,
       `  ${cred.isFavorite}, ${customEnc ? `'${sqlEscape(customEnc)}'` : 'NULL'}, ${customIv ? `'${customIv}'` : 'NULL'},`,
       `  ${str}, NOW(), NOW());`

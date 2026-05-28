@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/setup', '/api/vault/status', '/api/vault/setup', '/api/auth/login'];
-const PUBLIC_PREFIXES = ['/api/vault/status', '/api/vault/setup', '/api/auth/login'];
+const PUBLIC_PATHS = [
+  '/login',
+  '/register',
+  '/setup',
+  '/api/vault/status',
+  '/api/vault/setup',
+  '/api/auth/login',
+  '/api/auth/register',
+];
+const PUBLIC_PREFIXES = [
+  '/api/vault/status',
+  '/api/vault/setup',
+  '/api/auth/login',
+  '/api/auth/register',
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

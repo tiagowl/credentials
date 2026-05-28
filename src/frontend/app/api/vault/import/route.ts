@@ -4,7 +4,7 @@ import { apiSuccess, handleApiError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {
-    const { vaultKey } = await requireSession();
+    const { vaultKey, userId } = await requireSession();
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const mode = (formData.get('mode') as 'merge' | 'replace') ?? 'merge';
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
 
     const content = await file.text();
     const result = await importVault(
+      userId,
       content,
       format,
       mode,

@@ -6,10 +6,15 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { vaultKey } = await requireSession();
+    const { vaultKey, userId } = await requireSession();
     const body = await request.json();
     const parsed = exportSchema.parse(body);
-    const result = await exportVault(parsed.format, parsed.password, vaultKey);
+    const result = await exportVault(
+      userId,
+      parsed.format,
+      parsed.password,
+      vaultKey
+    );
 
     return new NextResponse(result.data, {
       status: 200,

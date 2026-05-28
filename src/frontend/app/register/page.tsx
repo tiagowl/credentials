@@ -1,20 +1,15 @@
-import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { RegisterForm } from '@/components/auth/RegisterForm';
 import { getSessionFromCookies } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
+export default async function RegisterPage() {
   const session = await getSessionFromCookies();
 
   if (session) {
     redirect('/dashboard');
   }
 
-  return (
-    <Suspense fallback={<div>Carregando...</div>}>
-      <LoginForm />
-    </Suspense>
-  );
+  return <RegisterForm />;
 }

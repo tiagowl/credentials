@@ -2,12 +2,13 @@ import crypto from 'crypto';
 import type { NextResponse } from 'next/server';
 
 const SESSION_COOKIE = 'vault_session';
-const SESSION_MAX_AGE = 60 * 60 * 24; // 24h cookie; idle timeout in payload.exp
+const SESSION_MAX_AGE = 60 * 60 * 24;
 
 export interface SessionPayload {
   sid: string;
   exp: number;
   vk: string;
+  uid: string;
 }
 
 async function getCookieStore() {
@@ -67,7 +68,9 @@ function decryptPayload(token: string): SessionPayload | null {
       decipher.update(Buffer.from(parsed.d, 'base64')),
       decipher.final(),
     ]);
-    return JSON.parse(decrypted.toString('utf8')) as SessionPayload;
+    const payload = JSON.parse(decrypted.toString('utf8')) as SessionPayload;
+    if (!payload.uid) return null;
+    return payload;
   } catch {
     return null;
   }
@@ -90,12 +93,14 @@ export function parseSessionCookie(value: string): SessionPayload | null {
 
 export function createSessionPayload(
   vaultKey: Buffer,
+  userId: string,
   timeoutMinutes = 15
 ): SessionPayload {
   return {
     sid: crypto.randomUUID(),
     exp: Date.now() + timeoutMinutes * 60 * 1000,
     vk: vaultKey.toString('base64'),
+    uid: userId,
   };
 }
 
@@ -132,8 +137,16 @@ export async function clearSessionCookie(): Promise<void> {
   cookieStore.delete(SESSION_COOKIE);
 }
 
+export function clearSessionOnResponse(response: NextResponse): void {
+  response.cookies.set(SESSION_COOKIE, '', {
+    ...SESSION_COOKIE_OPTIONS,
+    maxAge: 0,
+  });
+}
+
 export async function getSessionFromCookies(): Promise<{
   sessionId: string;
+  userId: string;
   vaultKey: Buffer;
 } | null> {
   const cookieStore = await getCookieStore();
@@ -143,6 +156,7 @@ export async function getSessionFromCookies(): Promise<{
   if (!payload || Date.now() > payload.exp) return null;
   return {
     sessionId: payload.sid,
+    userId: payload.uid,
     vaultKey: Buffer.from(payload.vk, 'base64'),
   };
 }
@@ -158,7 +172,11 @@ export async function extendSessionCookie(timeoutMinutes: number): Promise<boole
   return true;
 }
 
-export async function requireSession(): Promise<{ sessionId: string; vaultKey: Buffer }> {
+export async function requireSession(): Promise<{
+  sessionId: string;
+  userId: string;
+  vaultKey: Buffer;
+}> {
   const session = await getSessionFromCookies();
   if (!session) {
     throw new SessionError('Unauthorized');

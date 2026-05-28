@@ -61,6 +61,18 @@ export interface VaultConfigDTO {
   accentColor: string;
 }
 
+export interface AccountProfileDTO {
+  email: string | null;
+  displayName: string | null;
+  hasEmail: boolean;
+  createdAt: string;
+}
+
+export interface VaultStatusDTO {
+  configured: boolean;
+  registrationOpen: boolean;
+}
+
 export interface PasswordHistoryItem {
   id: string;
   strength: number;

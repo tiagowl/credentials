@@ -1,9 +1,11 @@
-import { prisma } from '@/lib/prisma';
 import { listCredentials } from './credential.service';
 import type { VaultHealth } from '@/types';
 
-export async function getVaultHealth(vaultKey: Buffer): Promise<VaultHealth> {
-  const all = await listCredentials({}, vaultKey);
+export async function getVaultHealth(
+  userId: string,
+  vaultKey: Buffer
+): Promise<VaultHealth> {
+  const all = await listCredentials(userId, {}, vaultKey);
 
   const weak = all.filter((c) => c.passwordStrength < 50);
   const passwordMap = new Map<string, typeof all>();
@@ -38,8 +40,8 @@ export async function getVaultHealth(vaultKey: Buffer): Promise<VaultHealth> {
   };
 }
 
-export async function getDashboardStats(vaultKey: Buffer) {
-  const all = await listCredentials({}, vaultKey);
+export async function getDashboardStats(userId: string, vaultKey: Buffer) {
+  const all = await listCredentials(userId, {}, vaultKey);
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
@@ -48,7 +50,7 @@ export async function getDashboardStats(vaultKey: Buffer) {
   const recent = [...all]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
-  const health = await getVaultHealth(vaultKey);
+  const health = await getVaultHealth(userId, vaultKey);
 
   return {
     total: all.length,

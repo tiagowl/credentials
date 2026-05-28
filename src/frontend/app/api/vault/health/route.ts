@@ -4,8 +4,8 @@ import { apiSuccess, handleApiError } from '@/lib/api-error';
 
 export async function GET() {
   try {
-    const { vaultKey } = await requireSession();
-    const health = await getVaultHealth(vaultKey);
+    const { vaultKey, userId } = await requireSession();
+    const health = await getVaultHealth(userId, vaultKey);
     return apiSuccess(health);
   } catch (error) {
     return handleApiError(error);

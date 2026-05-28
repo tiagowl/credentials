@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const parsed = loginSchema.parse(body);
-    const result = await login(parsed.password);
+    const result = await login(parsed.email.trim(), parsed.password);
     clearLoginAttempts(ip);
     const response = NextResponse.json({ success: result.success });
     applySessionCookie(response, result.payload);

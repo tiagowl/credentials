@@ -76,9 +76,12 @@ function toDTO(
   };
 }
 
-function buildWhere(filters: CredentialFilters): Prisma.CredentialWhereInput {
+function buildWhere(
+  userId: string,
+  filters: CredentialFilters
+): Prisma.CredentialWhereInput {
   const insensitive = { mode: 'insensitive' as const };
-  const and: Prisma.CredentialWhereInput[] = [];
+  const and: Prisma.CredentialWhereInput[] = [{ userId }];
 
   if (filters.search) {
     and.push({
@@ -108,6 +111,7 @@ function buildWhere(filters: CredentialFilters): Prisma.CredentialWhereInput {
 }
 
 export async function listCredentials(
+  userId: string,
   filters: CredentialFilters,
   vaultKey: Buffer
 ): Promise<CredentialListItem[]> {
@@ -119,7 +123,7 @@ export async function listCredentials(
         : { updatedAt: 'desc' };
 
   const rows = await prisma.credential.findMany({
-    where: buildWhere(filters),
+    where: buildWhere(userId, filters),
     orderBy,
     take: filters.limit ?? 100,
     skip: filters.offset ?? 0,
@@ -129,10 +133,11 @@ export async function listCredentials(
 }
 
 export async function listCredentialsPaginated(
+  userId: string,
   filters: CredentialFilters,
   vaultKey: Buffer
 ): Promise<PaginatedCredentials> {
-  const where = buildWhere(filters);
+  const where = buildWhere(userId, filters);
   const orderBy: Prisma.CredentialOrderByWithRelationInput =
     filters.sort === 'appName'
       ? { appName: 'asc' }
@@ -161,13 +166,18 @@ export async function listCredentialsPaginated(
   };
 }
 
-export async function getCredential(id: string, vaultKey: Buffer): Promise<CredentialDTO> {
-  const row = await prisma.credential.findUnique({ where: { id } });
+export async function getCredential(
+  userId: string,
+  id: string,
+  vaultKey: Buffer
+): Promise<CredentialDTO> {
+  const row = await prisma.credential.findFirst({ where: { id, userId } });
   if (!row) throw new AppError('NOT_FOUND', 'Credencial não encontrada', 404);
   return toDTO(row, vaultKey);
 }
 
 export async function createCredential(
+  userId: string,
   input: CreateCredentialInput,
   vaultKey: Buffer
 ): Promise<CredentialDTO> {
@@ -187,6 +197,7 @@ export async function createCredential(
 
   const row = await prisma.credential.create({
     data: {
+      userId,
       appName: input.appName,
       username: input.username || null,
       email: input.email || null,
@@ -209,11 +220,12 @@ export async function createCredential(
 }
 
 export async function updateCredential(
+  userId: string,
   id: string,
   input: UpdateCredentialInput,
   vaultKey: Buffer
 ): Promise<CredentialDTO> {
-  const existing = await prisma.credential.findUnique({ where: { id } });
+  const existing = await prisma.credential.findFirst({ where: { id, userId } });
   if (!existing) throw new AppError('NOT_FOUND', 'Credencial não encontrada', 404);
 
   const data: Prisma.CredentialUpdateInput = {};
@@ -250,17 +262,18 @@ export async function updateCredential(
   return toDTO(row, vaultKey);
 }
 
-export async function deleteCredential(id: string): Promise<void> {
-  const existing = await prisma.credential.findUnique({ where: { id } });
+export async function deleteCredential(userId: string, id: string): Promise<void> {
+  const existing = await prisma.credential.findFirst({ where: { id, userId } });
   if (!existing) throw new AppError('NOT_FOUND', 'Credencial não encontrada', 404);
   await prisma.credential.delete({ where: { id } });
 }
 
 export async function toggleFavorite(
+  userId: string,
   id: string,
   vaultKey: Buffer
 ): Promise<CredentialDTO> {
-  const existing = await prisma.credential.findUnique({ where: { id } });
+  const existing = await prisma.credential.findFirst({ where: { id, userId } });
   if (!existing) throw new AppError('NOT_FOUND', 'Credencial não encontrada', 404);
   const row = await prisma.credential.update({
     where: { id },

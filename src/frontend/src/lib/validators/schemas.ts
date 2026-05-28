@@ -11,9 +11,38 @@ export const setupSchema = z
     path: ['confirmPassword'],
   });
 
+export const registerSchema = z
+  .object({
+    email: z.string().email('Email inválido'),
+    displayName: z.string().max(80).optional(),
+    password: z.string().min(8, 'Mínimo 8 caracteres'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'Senhas não coincidem',
+    path: ['confirmPassword'],
+  });
+
 export const loginSchema = z.object({
+  email: z.string().email('Email inválido'),
   password: z.string().min(1, 'Senha obrigatória'),
 });
+
+export const profileSchema = z.object({
+  email: z.string().email('Email inválido').optional(),
+  displayName: z.string().max(80).optional().nullable(),
+});
+
+export const changeMasterPasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Senha atual obrigatória'),
+    newPassword: z.string().min(8, 'Mínimo 8 caracteres'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: 'Senhas não coincidem',
+    path: ['confirmPassword'],
+  });
 
 export const createCredentialSchema = z.object({
   appName: z.string().min(1, 'Nome do app é obrigatório'),

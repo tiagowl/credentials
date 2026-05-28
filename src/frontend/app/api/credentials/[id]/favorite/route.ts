@@ -7,8 +7,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { vaultKey } = await requireSession();
-    const credential = await toggleFavorite(params.id, vaultKey);
+    const { vaultKey, userId } = await requireSession();
+    const credential = await toggleFavorite(userId, params.id, vaultKey);
     return apiSuccess(credential);
   } catch (error) {
     return handleApiError(error);

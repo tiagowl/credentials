@@ -31,6 +31,28 @@ npm run dev
 
 Acesse: http://localhost:3000
 
+### Script: usuário winkellandi
+
+Para criar `winkellandi123@gmail.com` e vincular todas as credenciais (preservando o salt de criptografia atual):
+
+```bash
+npm run db:sql:winkellandi
+```
+
+Ou execute `prisma/scripts/link-user-winkellandi.sql` no SQL Editor do Neon.
+
+### Multi-usuário
+
+Cada pessoa cria sua conta em `/register` (email + senha mestra). O login fica em `/login` com link **“Criar conta gratuita”**.
+
+### Conta existente (migração)
+
+Se você já tinha um vault antes da versão multi-usuário:
+
+1. Rode: `npm run db:migrate:deploy`
+2. Se não tinha email, o sistema gera `legacy-{id}@vault.local` — defina um email real em **Minha conta**
+3. Entre com email + a **mesma senha mestra** de antes
+
 ### Variáveis de ambiente
 
 | Variável | Descrição |
@@ -62,7 +84,9 @@ npm run db:seed          # Recomendado — popula via TypeScript
 ## Features implementadas
 
 ### Sprint 1-2 (Release 0.5)
-- Setup senha mestra + login
+- Cadastro (email + senha mestra) e login
+- Perfil: dados pessoais, alterar senha mestra, logout
+- Setup senha mestra + login (contas antigas sem email)
 - CRUD credenciais criptografadas
 - Busca global + filtros
 - Copy 1-clique + toast

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -12,6 +13,9 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:sql:winkellandi": "prisma db execute --file prisma/scripts/link-user-winkellandi.sql --schema prisma/schema.prisma",
+    "db:fix:winkellandi-hash": "node prisma/scripts/fix-winkellandi-password-hash.mjs",
     "db:studio": "prisma studio"
   },
   "dependencies": {

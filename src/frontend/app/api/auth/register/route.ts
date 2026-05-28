@@ -4,7 +4,6 @@ import { registerSchema } from '@/lib/validators/schemas';
 import { handleApiError } from '@/lib/api-error';
 import { applySessionCookie } from '@/lib/session';
 
-/** Alias de cadastro — prefira POST /api/auth/register */
 export async function POST(request: Request) {
   try {
     const body = await request.json();

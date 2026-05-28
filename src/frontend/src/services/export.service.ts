@@ -1,23 +1,23 @@
 import { prisma } from '@/lib/prisma';
-import { encryptExport, decryptExport } from '@/lib/crypto';
+import { encryptExport, decryptExport, verifyMasterPassword } from '@/lib/crypto';
 import { listCredentials, createCredential } from './credential.service';
 import type { CreateCredentialInput } from '@/lib/validators/schemas';
 import type { ImportResult } from '@/types';
 import { AppError } from '@/lib/api-error';
-import { verifyMasterPassword } from '@/lib/crypto';
 
 export async function exportVault(
+  userId: string,
   format: 'json' | 'csv',
   masterPassword: string,
   vaultKey: Buffer
 ): Promise<{ data: string; filename: string; contentType: string }> {
-  const config = await prisma.vaultConfig.findFirst();
-  if (!config) throw new AppError('NOT_FOUND', 'Vault não configurado', 404);
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError('NOT_FOUND', 'Conta não encontrada', 404);
 
-  const valid = await verifyMasterPassword(masterPassword, config.masterPasswordHash);
+  const valid = await verifyMasterPassword(masterPassword, user.masterPasswordHash);
   if (!valid) throw new AppError('UNAUTHORIZED', 'Senha mestra incorreta', 401);
 
-  const credentials = await listCredentials({}, vaultKey);
+  const credentials = await listCredentials(userId, {}, vaultKey);
 
   if (format === 'csv') {
     const header = 'appName,username,email,password,url,category\n';
@@ -53,6 +53,7 @@ export async function exportVault(
 }
 
 export async function importVault(
+  userId: string,
   content: string,
   format: 'json' | 'csv',
   mode: 'merge' | 'replace',
@@ -93,8 +94,10 @@ export async function importVault(
   }
 
   if (mode === 'replace') {
-    await prisma.passwordHistory.deleteMany();
-    await prisma.credential.deleteMany();
+    await prisma.passwordHistory.deleteMany({
+      where: { credential: { userId } },
+    });
+    await prisma.credential.deleteMany({ where: { userId } });
   }
 
   let created = 0;
@@ -109,14 +112,18 @@ export async function importVault(
       }
       if (mode === 'merge') {
         const existing = await prisma.credential.findFirst({
-          where: { appName: item.appName, username: item.username ?? undefined },
+          where: {
+            userId,
+            appName: item.appName,
+            username: item.username ?? undefined,
+          },
         });
         if (existing) {
           skipped++;
           continue;
         }
       }
-      await createCredential(item, vaultKey);
+      await createCredential(userId, item, vaultKey);
       created++;
     } catch {
       errors++;

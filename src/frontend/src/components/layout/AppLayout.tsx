@@ -16,8 +16,10 @@ import {
   Key,
   Shield,
   Settings,
+  User,
   Plus,
   Lock,
+  LogOut,
   Moon,
   Sun,
   Menu,
@@ -34,6 +36,7 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/credentials', label: 'Credenciais', icon: Key },
   { href: '/health', label: 'Vault Health', icon: Shield },
+  { href: '/profile', label: 'Minha conta', icon: User },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ];
 
@@ -70,6 +73,12 @@ export function AppLayout({
   const lockVault = async () => {
     await api.post('/api/auth/lock');
     router.push('/login');
+  };
+
+  const logout = async () => {
+    await api.post('/api/auth/logout');
+    router.push('/login?logout=1');
+    router.refresh();
   };
 
   const Sidebar = () => (
@@ -168,6 +177,9 @@ export function AppLayout({
             </IconButton>
             <IconButton aria-label="Bloquear vault" variant="ghost" onClick={lockVault}>
               <Lock size={18} />
+            </IconButton>
+            <IconButton aria-label="Sair da conta" variant="ghost" onClick={logout}>
+              <LogOut size={18} />
             </IconButton>
             {onNewCredential && (
               <Button size="sm" colorPalette="blue" onClick={onNewCredential}>

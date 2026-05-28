@@ -13,8 +13,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { vaultKey } = await requireSession();
-    const credential = await getCredential(params.id, vaultKey);
+    const { vaultKey, userId } = await requireSession();
+    const credential = await getCredential(userId, params.id, vaultKey);
     return apiSuccess(credential);
   } catch (error) {
     return handleApiError(error);
@@ -26,10 +26,10 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { vaultKey } = await requireSession();
+    const { vaultKey, userId } = await requireSession();
     const body = await request.json();
     const parsed = updateCredentialSchema.parse(body);
-    const credential = await updateCredential(params.id, parsed, vaultKey);
+    const credential = await updateCredential(userId, params.id, parsed, vaultKey);
     return apiSuccess(credential);
   } catch (error) {
     return handleApiError(error);
@@ -41,8 +41,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireSession();
-    await deleteCredential(params.id);
+    const { userId } = await requireSession();
+    await deleteCredential(userId, params.id);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return handleApiError(error);
