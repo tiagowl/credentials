@@ -34,9 +34,10 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === '/') {
-    return NextResponse.redirect(
-      new URL(hasValidSession ? '/dashboard' : '/login', request.url)
-    );
+    if (hasValidSession) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
   }
 
   if (!hasValidSession && !isPublic) {
