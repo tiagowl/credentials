@@ -19,7 +19,7 @@ const PUBLIC_PREFIXES = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasValidSession = !!request.cookies.get('vault_session')?.value;
+  const hasSessionCookie = !!request.cookies.get('vault_session')?.value;
 
   const isPublic =
     PUBLIC_PATHS.includes(pathname) ||
@@ -27,20 +27,19 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/manifest') ||
     pathname === '/sw.js' ||
-    pathname.match(/\.(ico|png|svg|json)$/);
+    pathname.match(/\.(ico|png|svg|json|webmanifest)$/);
 
   if (pathname.startsWith('/api/') && isPublic) {
     return NextResponse.next();
   }
 
+  // Redireciona na borda (Edge) — não depende de Prisma
   if (pathname === '/') {
-    if (hasValidSession) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.next();
+    const target = hasSessionCookie ? '/dashboard' : '/login';
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
-  if (!hasValidSession && !isPublic) {
+  if (!hasSessionCookie && !isPublic) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Sessão inválida' } },

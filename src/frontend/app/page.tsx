@@ -1,20 +1,10 @@
 import { redirect } from 'next/navigation';
 import { getSessionFromCookies } from '@/lib/session';
-import { getVaultStatus } from '@/services/auth.service';
 
 export const dynamic = 'force-dynamic';
 
+/** Fallback server-side se o middleware não rodar */
 export default async function HomePage() {
-  try {
-    const [session, status] = await Promise.all([
-      getSessionFromCookies(),
-      getVaultStatus(),
-    ]);
-    if (session) {
-      redirect('/dashboard');
-    }
-    redirect(status.configured ? '/login' : '/register');
-  } catch {
-    redirect('/login');
-  }
+  const session = await getSessionFromCookies();
+  redirect(session ? '/dashboard' : '/login');
 }
